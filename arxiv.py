@@ -5,8 +5,8 @@ import re
 os.environ['LANG'] = 'C.UTF-8'
 
 categories = [
-    'MM',
-    'DC',
+    'cs.MM',
+    'cs.DC',
 ]
 
 file_name = "./today_arxiv.txt"
@@ -24,7 +24,7 @@ with open(file_name, 'w') as file:
     file.write(str(date.today()))
 
 for category in categories:
-    url = f'https://arxiv.org/list/cs.{category}/pastweek?skip=0&show=200'
+    url = f'https://arxiv.org/list/{category}/pastweek?skip=0&show=200'
     response = requests.get(url)
 
     with open(f'/tmp/{category}_raw.txt', 'w') as file:
@@ -56,7 +56,7 @@ for category in categories:
     with open(file_name, 'a') as file:
         file.write(
             "\n\n\n===============================================================================\n")
-        file.write(f"\t\t\t[Category: cs.{category}]  [" + str(date.today()) + "]\n")
+        file.write(f"\t\t\t[Category: {category}]  [" + str(date.today()) + "]\n")
         file.write("===============================================================================\n")
         with open(f'/tmp/{category}.txt', 'r') as category_file:
             for line in list(category_file):
