@@ -1,0 +1,3 @@
+jedi
+jedi-language-server
+requests
