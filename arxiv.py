@@ -63,3 +63,6 @@ for category in categories:
                 file.write(line)
 
         i = i + 1
+
+import os
+os.system(f"less {file_name}")
