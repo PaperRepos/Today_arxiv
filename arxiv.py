@@ -8,8 +8,10 @@ categories = [
     'cs.MM',
     'cs.DC',
 ]
+each_category_max_paper_num = 100
 
 file_name = "./today_arxiv.txt"
+temp_dir = "./tmp"
 
 def extract_url(input_str):
     # Find the start and end positions of the paper title and link
@@ -19,21 +21,30 @@ def extract_url(input_str):
     output_str = f"Paper: {paper_link}"
     return output_str
 
-# Save today's date to /tmp/arxiv.txt
-with open(file_name, 'w') as file:
-    file.write(str(date.today()))
+# check if the temp dir exists
+if not os.path.exists(temp_dir):
+    os.makedirs(temp_dir)
+else:
+    # remove all files in the temp dir
+    for file in os.listdir(temp_dir):
+        os.remove(os.path.join(temp_dir, file))
+
+# check if the file exists and remove it
+if os.path.exists(file_name):
+    os.remove(file_name)
+
 
 for category in categories:
-    url = f'https://arxiv.org/list/{category}/pastweek?skip=0&show=200'
+    url = f'https://arxiv.org/list/{category}/pastweek?skip=0&show={each_category_max_paper_num}'
     response = requests.get(url)
 
-    with open(f'/tmp/{category}_raw.txt', 'w') as file:
+    with open(f'{temp_dir}/{category}_raw.txt', 'w') as file:
         file.write(response.text)
-    with open(f'/tmp/{category}_raw.txt', 'r') as input_file, open(f'/tmp/{category}.txt', 'w') as output_file:
+    with open(f'{temp_dir}/{category}_raw.txt', 'r') as input_file, open(f'{temp_dir}/{category}.txt', 'w') as output_file:
         for line in input_file:
             if '<h3>' in line or '<span class="descriptor">Title:</span>' in line or 'href="/abs/' in line:
                 output_file.write(line)
-    with open(f'/tmp/{category}.txt', 'r') as file:
+    with open(f'{temp_dir}/{category}.txt', 'r') as file:
         content = file.read()
 
     urls = re.findall(r'href="(\/abs\/.*?)"', content)
@@ -50,7 +61,7 @@ for category in categories:
                 lines[i] = line.replace(f'href="{url}"', f'https://arxiv.org{url}')
                 lines[i] = extract_url(lines[i])
     content = '\n'.join(lines)
-    with open(f'/tmp/{category}.txt', 'w') as file:
+    with open(f'{temp_dir}/{category}.txt', 'w') as file:
         file.write(content)
 
     with open(file_name, 'a') as file:
@@ -58,7 +69,7 @@ for category in categories:
             "\n\n\n===============================================================================\n")
         file.write(f"\t\t\t[Category: {category}]  [" + str(date.today()) + "]\n")
         file.write("===============================================================================\n")
-        with open(f'/tmp/{category}.txt', 'r') as category_file:
+        with open(f'{temp_dir}/{category}.txt', 'r') as category_file:
             for line in list(category_file):
                 file.write(line)
 
